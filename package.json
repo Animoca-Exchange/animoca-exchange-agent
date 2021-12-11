@@ -1,0 +1,20 @@
+{
+  "name": "animoca-exchange-agent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ethers": "^5.5.2",
+    "fastify": "^3.24.1",
+    "fastify-cors": "^6.0.2",
+    "fastify-jwt": "^4.0.1",
+    "fast-jwt": "^1.4.0",
+    "fastify-swagger": "^4.12.6",
+    "typescript": "^4.5.2"
+  }
+}
