@@ -83,7 +83,7 @@ curl --request POST \
 Step 3: Request signed token, to be used on withdrawal validation
 ```shell
 curl --request POST \
-  --url hthttps://polygon.gamingnablock.com.br/animoca_exchange/create_signed_token \
+  --url https://polygon.gamingnablock.com.br/animoca_exchange/create_signed_token \
   --header 'Content-Type: application/json' \
   --data '{
 	"orgId": "<ORG_ID>",
