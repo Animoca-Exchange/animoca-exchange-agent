@@ -1,141 +1,145 @@
-import Fastify, {FastifyInstance, FastifyReply, FastifyRequest} from 'fastify';
-import fastifyCors from "fastify-cors";
-import {readFileSync} from "fs";
-import {Contract, providers, Wallet} from "ethers";
-import {hexlify, parseUnits} from "ethers/lib/utils";
-import {walletHandlerABI} from "./abi";
-
-export class AnimocaAgent {
-    server: FastifyInstance
-    private privateKey!: string;
-    private serverAddress!: string;
-    private serverPort!: number;
-    private polygonRpc!: string;
-    private provider!: providers.JsonRpcProvider;
-    private wallet!: Wallet;
-    private walletSigner!: Wallet;
-    private walletHandlerAddress!: string;
-    private walletHandlerContract!: Contract;
-
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AnimocaAgent = void 0;
+const fastify_1 = __importDefault(require("fastify"));
+const fastify_cors_1 = __importDefault(require("fastify-cors"));
+const fs_1 = require("fs");
+const ethers_1 = require("ethers");
+const utils_1 = require("ethers/lib/utils");
+const abi_1 = require("./abi");
+class AnimocaAgent {
+    server;
+    privateKey;
+    serverAddress;
+    serverPort;
+    polygonRpc;
+    provider;
+    wallet;
+    walletSigner;
+    walletHandlerAddress;
+    walletHandlerContract;
     constructor() {
         this.loadSettings();
         this.initChainClient();
-        this.server = Fastify();
-        this.server.register(fastifyCors);
+        this.server = (0, fastify_1.default)();
+        this.server.register(fastify_cors_1.default);
         this.addRoutes();
     }
-
-    private addRoutes() {
-        this.server.post('/withdrawal_handler', async (request: FastifyRequest, reply: FastifyReply) => {
-            const body = request.body as any;
+    addRoutes() {
+        this.server.post('/withdrawal_handler', async (request, reply) => {
+            const body = request.body;
             if (Object.keys(body).length === 0) {
                 // empty object body for health check only
-                reply.status(200).send({status: true, ts: Date.now()});
-            } else {
+                reply.status(200).send({ status: true, ts: Date.now() });
+            }
+            else {
                 console.log(body);
                 // TODO: add custom logic here
-
                 // call withdraw function
                 await this.withdraw(body.address, body.destinationAddress, body.tokenAmount);
-                reply.status(200).send({status: true});
+                reply.status(200).send({ status: true });
             }
         });
-        this.server.post('/deposit_handler', async (request: FastifyRequest, reply: FastifyReply) => {
-            const body = request.body as any;
+        this.server.post('/deposit_handler', async (request, reply) => {
+            const body = request.body;
             if (Object.keys(body).length === 0) {
                 // empty object body for health check only
-                reply.status(200).send({status: true, ts: Date.now()});
-            } else {
+                reply.status(200).send({ status: true, ts: Date.now() });
+            }
+            else {
                 console.log(body);
                 // TODO: add custom logic here
-                reply.status(200).send({status: true});
+                reply.status(200).send({ status: true });
             }
         });
     }
-
     async start() {
         try {
             await this.server.listen(this.serverPort, this.serverAddress);
             const address = this.server.server.address();
-            const port = typeof address === 'string' ? address : address?.port
+            const port = typeof address === 'string' ? address : address?.port;
             console.log(`Server listening on port: ${port} | address: ${this.serverAddress}`);
-        } catch (err) {
+        }
+        catch (err) {
             this.server.log.error(err);
             process.exit(1);
         }
     }
-
-    private loadSettings() {
-        const configFile = readFileSync('agent.config.json');
+    loadSettings() {
+        const configFile = (0, fs_1.readFileSync)('agent.config.json');
         let parsedConfig;
         try {
             parsedConfig = JSON.parse(configFile.toString());
-        } catch (e: any) {
+        }
+        catch (e) {
             console.log('Failed to parse agent.config.json:', e.message);
         }
-
         if (parsedConfig.port) {
             this.serverPort = parseInt(parsedConfig.port);
-        } else {
+        }
+        else {
             this.serverPort = 13007;
         }
-
         if (parsedConfig.walletHandlerAddress) {
             this.walletHandlerAddress = parsedConfig.walletHandlerAddress;
-        } else {
+        }
+        else {
             this.walletHandlerAddress = '0x6E93A888Ee687957D8AC3CC6cCD817445c79632D';
         }
-
         if (parsedConfig.serverAddress) {
             this.serverAddress = parsedConfig.serverAddress;
-        } else {
+        }
+        else {
             this.serverAddress = '127.0.0.1';
         }
-
         if (parsedConfig.polygonRpc) {
             this.polygonRpc = parsedConfig.polygonRpc;
-        } else {
+        }
+        else {
             this.polygonRpc = 'https://polygon-rpc.com';
         }
-
         if (parsedConfig.privateKey) {
             this.privateKey = parsedConfig.privateKey;
             if (!this.privateKey.startsWith('0x')) {
                 this.privateKey = '0x' + this.privateKey;
             }
-        } else {
+        }
+        else {
             console.log('Private key not present!');
             process.exit(1);
         }
     }
-
-    private initChainClient() {
-        this.provider = new providers.JsonRpcProvider(this.polygonRpc);
+    initChainClient() {
+        this.provider = new ethers_1.providers.JsonRpcProvider(this.polygonRpc);
         this.provider.ready.then(value => {
             if (value.chainId !== 137) {
                 console.log('Wrong chain!');
                 process.exit(1);
             }
-            this.wallet = new Wallet(this.privateKey);
+            this.wallet = new ethers_1.Wallet(this.privateKey);
             this.walletSigner = this.wallet.connect(this.provider);
             this.provider.getGasPrice().then((currentGasPrice) => {
-                let gas_price = hexlify(currentGasPrice);
-                console.log(`gas_price: ${gas_price}`)
+                let gas_price = (0, utils_1.hexlify)(currentGasPrice);
+                console.log(`gas_price: ${gas_price}`);
             });
-            this.walletHandlerContract = new Contract(this.walletHandlerAddress, walletHandlerABI, this.provider);
+            this.walletHandlerContract = new ethers_1.Contract(this.walletHandlerAddress, abi_1.walletHandlerABI, this.provider);
         });
     }
-
-    async withdraw(gameToken: string, to: string, amount: string) {
-        let _amount = parseUnits(amount, 18);
+    async withdraw(gameToken, to, amount) {
+        let _amount = (0, utils_1.parseUnits)(amount, 18);
         console.log(`Withdrawing ${_amount} of ${gameToken} to wallet: ${to}`);
         try {
             const transferResult = await this.walletHandlerContract.withdraw(gameToken, to, _amount);
             console.log(transferResult);
             return true;
-        } catch (e) {
+        }
+        catch (e) {
             console.log(e);
             return false;
         }
     }
 }
+exports.AnimocaAgent = AnimocaAgent;

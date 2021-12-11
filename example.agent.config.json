@@ -1,0 +1,7 @@
+{
+  "walletHandlerAddress": "0x6E93A888Ee687957D8AC3CC6cCD817445c79632D",
+  "port": 3008,
+  "privateKey": "HOT_WALLET_PRIVATE_KEY",
+  "serverAddress": "0.0.0.0",
+  "polygonRpc": "https://rpc-mainnet.maticvigil.com/v1/9004a489fe4b15d6387ccc4301922ee4dba8eae7"
+}

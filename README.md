@@ -28,7 +28,7 @@ nano agent.config.json
 npm run start:agent
 ```
 
-5. Or with PM2 (recommended)
+5. Or with [PM2](https://pm2.keymetrics.io/docs/usage/quick-start/) (recommended for production)
 ```shell
 pm2 start dist/index.js --name AnimocaXAgent
 ```
