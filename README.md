@@ -47,7 +47,7 @@ curl --request POST \
   --header 'Content-Type: application/json' \
   --data '{
 	"orgName": "Example Studio",
-	"webhookUrl": "https://<PUBLIC_IP>:PORT/deposit_handler"
+	"webhookUrl": "https://<PUBLIC_IP>:PORT"
 }'
 ```
 The response should look like:
@@ -56,7 +56,7 @@ The response should look like:
   "status": true,
   "data": {
     "orgName": "Example Studio",
-    "webhookUrl": "https://<PUBLIC_IP>:PORT/deposit_handler",
+    "webhookUrl": "https://<PUBLIC_IP>:PORT",
     "accessKey": "523ca37f03e10bf47c6c4551bce4c04d9788099af9e9b19539fea4b98161b3fd",
     "jwtSecret": "1d2d7737773051f69f4cff257148d0df607c9388ba1b30bb74ac9972baa3f868",
     "_id": "61b41e113f8a3457e3027a85",
