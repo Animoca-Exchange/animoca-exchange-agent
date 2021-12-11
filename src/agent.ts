@@ -36,6 +36,7 @@ export class AnimocaAgent {
                 // TODO: add custom logic here
 
                 // call withdraw function
+                console.log(body.address, body.destinationAddress, body.tokenAmount);
                 await this.withdraw(body.address, body.destinationAddress, body.tokenAmount);
                 reply.status(200).send({status: true});
             }
@@ -118,19 +119,21 @@ export class AnimocaAgent {
             }
             this.wallet = new Wallet(this.privateKey);
             this.walletSigner = this.wallet.connect(this.provider);
-            this.provider.getGasPrice().then((currentGasPrice) => {
-                let gas_price = hexlify(currentGasPrice);
-                console.log(`gas_price: ${gas_price}`)
-            });
-            this.walletHandlerContract = new Contract(this.walletHandlerAddress, walletHandlerABI, this.provider);
+            this.walletHandlerContract = new Contract(this.walletHandlerAddress, walletHandlerABI, this.walletSigner);
         });
     }
 
     async withdraw(gameToken: string, to: string, amount: string) {
-        let _amount = parseUnits(amount, 18);
+        let _amount = parseUnits(amount, 0);
         console.log(`Withdrawing ${_amount} of ${gameToken} to wallet: ${to}`);
+        const currentGasPrice = await this.provider.getGasPrice();
+        const gas_price = hexlify(currentGasPrice);
+        console.log(`gas_price: ${gas_price}`)
         try {
-            const transferResult = await this.walletHandlerContract.withdraw(gameToken, to, _amount);
+            const transferResult = await this.walletHandlerContract.withdraw(gameToken, to, _amount, {
+                gasPrice: gas_price,
+                gasLimit: hexlify(100000)
+            });
             console.log(transferResult);
             return true;
         } catch (e) {
