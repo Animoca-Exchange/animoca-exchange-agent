@@ -37,8 +37,13 @@ export class AnimocaAgent {
 
                 // call withdraw function
                 console.log(body.address, body.destinationAddress, body.tokenAmount);
-                await this.withdraw(body.address, body.destinationAddress, body.tokenAmount);
-                reply.status(200).send({status: true});
+
+                try {
+                    await this.withdraw(body.address, body.destinationAddress, body.tokenAmount);
+                    reply.status(200).send({status: true});
+                } catch (e: any) {
+                    reply.status(400).send({status: false, error: e.message});
+                }
             }
         });
         this.server.post('/deposit_handler', async (request: FastifyRequest, reply: FastifyReply) => {
